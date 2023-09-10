@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Config>
+    <Parameter1>
+        <Item>
+            <Libelle>Option 1</Libelle>
+            <Valeur>Valeur1</Valeur>
+        </Item>
+        <Item>
+            <Libelle>Option 2</Libelle>
+            <Valeur>Valeur2</Valeur>
+        </Item>
+        <!-- Ajoutez d'autres Parameter ici -->
+    </Parameter1>
+
+    <Parameter2>
+        <Item>
+            <Libelle>OptionA</Libelle>
+            <Valeur>ValeurA</Valeur>
+        </Item>
+        <Item>
+            <Libelle>OptionB</Libelle>
+            <Valeur>ValeurB</Valeur>
+        </Item>
+        <!-- Ajoutez d'autres Parameter ici -->
+    </Parameter2>
+
+    <Parameter3>
+        <Item>
+            <Libelle>ItemX</Libelle>
+            <Valeur>ValueX</Valeur>
+        </Item>
+        <Item>
+            <Libelle>ItemY</Libelle>
+            <Valeur>ValueY</Valeur>
+        </Item>
+        <!-- Ajoutez d'autres Parameter ici -->
+    </Parameter3>
+</Config>
