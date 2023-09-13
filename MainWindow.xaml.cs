@@ -23,6 +23,7 @@ namespace mdt
                 RemplirListeDepuisXML(xmlDoc, "Parameter1", cmbParametre1);
                 RemplirListeDepuisXML(xmlDoc, "Parameter2", cmbParametre2);
                 RemplirListeDepuisXML(xmlDoc, "Parameter3", cmbParametre3);
+                RemplirListeDepuisXML(xmlDoc, "Parameter4", cmbParametre4);
             }
             catch (Exception ex)
             {
@@ -56,10 +57,11 @@ namespace mdt
             Parametre parametre1 = cmbParametre1.SelectedValue as Parametre;
             Parametre parametre2 = cmbParametre2.SelectedValue as Parametre;
             Parametre parametre3 = cmbParametre3.SelectedValue as Parametre;
+            Parametre parametre4 = cmbParametre4.SelectedValue as Parametre;
 
             if (parametre1 != null && parametre2 != null && parametre3 != null)
             {
-                string commande = $"dir {parametre1.Valeur} {parametre2.Valeur} {parametre3.Valeur}";
+                string commande = $"dir {parametre1.Valeur} {parametre2.Valeur} {parametre3.Valeur} {parametre4.Valeur}";
 
                 txtCommande.Text = commande;
 

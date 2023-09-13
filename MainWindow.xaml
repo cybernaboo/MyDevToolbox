@@ -1,18 +1,20 @@
 ﻿<Window x:Class="mdt.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Command Execution App" Height="350" Width="500">
+        Title="Command Execution App" Height="700" Width="1000">
     <Grid>
         <StackPanel Margin="20">
-            <TextBlock Text="Commande à exécuter:"/>
-            <TextBox x:Name="txtCommande" IsReadOnly="True"/>
             <TextBlock Text="Paramètre 1:"/>
             <ComboBox x:Name="cmbParametre1" ItemsSource="{Binding}" DisplayMemberPath="Libelle"/>
             <TextBlock Text="Paramètre 2:"/>
             <ComboBox x:Name="cmbParametre2" ItemsSource="{Binding}" DisplayMemberPath="Libelle"/>
             <TextBlock Text="Paramètre 3:"/>
             <ComboBox x:Name="cmbParametre3" ItemsSource="{Binding}" DisplayMemberPath="Libelle"/>
+            <TextBlock Text="Paramètre 4:"/>
+            <ComboBox x:Name="cmbParametre4" ItemsSource="{Binding}" DisplayMemberPath="Libelle"/>
             <Button Content="Exécuter la commande" Click="ExecuterCommande_Click"/>
+            <TextBlock Text="Commande à exécuter:"/>
+            <TextBox x:Name="txtCommande" IsReadOnly="True"/>
             <TextBlock Text="Sortie de la commande:" Margin="0,10,0,0"/>
             <TextBox x:Name="txtSortie" IsReadOnly="True" Height="150"/>
         </StackPanel>

@@ -35,4 +35,15 @@
         </Item>
         <!-- Ajoutez d'autres Parameter ici -->
     </Parameter3>
+    <Parameter4>
+        <Item>
+            <Libelle>ItemX</Libelle>
+            <Valeur>ValueX</Valeur>
+        </Item>
+        <Item>
+            <Libelle>ItemY</Libelle>
+            <Valeur>ValueY</Valeur>
+        </Item>
+        <!-- Ajoutez d'autres Parameter ici -->
+    </Parameter4>
 </Config>
