@@ -7,6 +7,8 @@ namespace mdt
 {
     public partial class MainWindow : Window
     {
+        string cheminFichierConfig = "config.xml";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -18,7 +20,7 @@ namespace mdt
             try
             {
                 XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load("config.xml");
+                xmlDoc.Load(cheminFichierConfig);
 
                 RemplirListeDepuisXML(xmlDoc, "Parameter1", cmbParametre1);
                 RemplirListeDepuisXML(xmlDoc, "Parameter2", cmbParametre2);

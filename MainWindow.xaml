@@ -4,6 +4,7 @@
         Title="Command Execution App" Height="700" Width="1000">
     <Grid>
         <StackPanel Margin="20">
+            <TextBlock Text="Mon texte en police Press Start 2P" FontFamily="Press Start 2P" FontSize="16" />
             <TextBlock Text="Paramètre 1:"/>
             <ComboBox x:Name="cmbParametre1" ItemsSource="{Binding}" DisplayMemberPath="Libelle"/>
             <TextBlock Text="Paramètre 2:"/>
