@@ -46,4 +46,12 @@
         </Item>
         <!-- Ajoutez d'autres Parameter ici -->
     </Parameter4>
+	<Files>
+		<File>
+			<FileName>C:\Users\cybernaboo\Desktop\a.txt</FileName>
+		</File>
+		<File>
+			<FileName>C:\Users\cybernaboo\Desktop\b.txt</FileName>
+		</File>
+	</Files>
 </Config>
