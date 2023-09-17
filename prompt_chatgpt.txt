@@ -1,0 +1,3 @@
+Liste des fonctionnalités que je veux ajouter à mon projet C# WPF :
+- Un bouton supplémentaire sous le bouton "exécuter la commande" pour enregistrer dans le fichier config.xml, ce setup de commande avec les 4 paramètres dans une rubrique "bookmarks" du fichier config.xml
+- A coté de ce nouveau bouton,  il faut un champ de saisie description, ce champ sera enregistré dans les bookmarks en même temps que les 4 paramètres
