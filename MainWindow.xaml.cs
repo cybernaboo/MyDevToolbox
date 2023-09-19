@@ -13,7 +13,9 @@ namespace mdt
 {
     public partial class MainWindow : Window
     {
-        string cheminFichierConfig = "config.xml";
+        static public string? fileEditor;
+        static public string? commandName;
+        static string cheminFichierConfig = "config.xml";
 
         public MainWindow()
         {
@@ -34,10 +36,34 @@ namespace mdt
                 RemplirListeDepuisXML(xmlDoc, "Parameter4", cmbParametre4);
 
                 ChargerFichiersDepuisXML(xmlDoc);
+                ChargerParmetresDepuisXML(xmlDoc);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erreur lors du chargement des données depuis le fichier XML : {ex.Message}");
+            }
+        }
+
+        private static void ChargerParmetresDepuisXML(XmlDocument xmlDoc)
+        {
+            try
+            {
+                fileEditor = xmlDoc.SelectSingleNode("//FileEditor")?.InnerText;
+                if (fileEditor == null)
+                {
+                    MessageBox.Show($"Pas de paramètre Editeur de fichier défini dans le fichier de paramétrage");
+                    return;
+                }
+                commandName = xmlDoc.SelectSingleNode("//Command")?.InnerText;
+                if (commandName == null)
+                {
+                    MessageBox.Show($"Pas de Commande système défini dans le fichier de paramétrage");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement des paramètres depuis le fichier XML : {ex.Message}");
             }
         }
 
@@ -69,7 +95,7 @@ namespace mdt
         {
             try
             {
-                XmlNodeList?  fileNodes = xmlDoc.SelectNodes("//Files/File");
+                XmlNodeList? fileNodes = xmlDoc.SelectNodes("//Files/File");
                 if (fileNodes == null)
                 {
                     return;
@@ -88,7 +114,7 @@ namespace mdt
                         fileButton.Click += async (sender, e) =>
                         {
                             string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
-                            string commande = $"notepad++.exe {filePath}";
+                            string commande = $"{fileEditor} {filePath}";
                             Console.WriteLine($"Commande : {commande}");
                             //string commande = $"C:\\Program Files\\Notepad++\\notepad++.exe {filePath}";
                             string sortie = await Task.Run(() => ExecuterCommandeShell(commande));
@@ -115,7 +141,7 @@ namespace mdt
 
             if (parametre1 != null && parametre2 != null && parametre3 != null && parametre4 != null)
             {
-                string commande = $"dir {parametre1.Valeur} {parametre2.Valeur} {parametre3.Valeur} {parametre4.Valeur}";
+                string commande = $"{commandName} {parametre1.Valeur} {parametre2.Valeur} {parametre3.Valeur} {parametre4.Valeur}";
 
                 txtCommande.Text = commande;
 
@@ -176,13 +202,13 @@ namespace mdt
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.Load(cheminFichierConfig);
 
-                XmlElement? bookmarks = xmlDoc.SelectSingleNode("//Config/Bookmarks") as XmlElement;
+                XmlElement? bookmarks = xmlDoc.SelectSingleNode("//Bookmarks") as XmlElement;
 
-                if (xmlDoc.SelectSingleNode("//Config/Bookmarks") == null)
-                {
-                    bookmarks = xmlDoc.CreateElement("Bookmarks");
-                    xmlDoc.SelectSingleNode("//Config")?.AppendChild(bookmarks);
-                }
+                // if (xmlDoc.SelectSingleNode("//Config/Bookmarks") == null)
+                // {
+                //     bookmarks = xmlDoc.CreateElement("Bookmarks");
+                //     xmlDoc.SelectSingleNode("//Config")?.AppendChild(bookmarks);
+                // }
 
                 XmlElement bookmark = xmlDoc.CreateElement("Bookmark");
                 bookmarks?.AppendChild(bookmark);
@@ -206,7 +232,7 @@ namespace mdt
                 XmlElement parameter4 = xmlDoc.CreateElement("Parameter4");
                 parameter4.InnerText = parametre4.Valeur;
                 bookmark.AppendChild(parameter4);
-                xmlDoc.SelectSingleNode("//Config/Bookmarks")?.AppendChild(bookmark);
+                xmlDoc.SelectSingleNode("//Bookmarks")?.AppendChild(bookmark);
 
                 // Sauvegardez le fichier XML mis à jour
                 xmlDoc.Save(cheminFichierConfig);
@@ -214,16 +240,21 @@ namespace mdt
         }
     }
 
-    public class Parametre
-    {
-        public string Libelle { get; set; }
-        public string Valeur { get; set; }
+    // public class Parametres
+    // {
+    //     public string? libelle { get; set; }
+    //     public string? valeur { get; set; }
+    //     public string? fileEditor { get; set; }
+    //     public string? commandName { get; set; }
 
-        public Parametre(string libelle, string valeur)
-        {
-            Libelle = libelle;
-            Valeur = valeur;
-        }
-    }
+    // public Parametres(string libelle, string valeur, string fileEditor, string commandName)
+    // {
+    //     this.libelle = libelle;
+    //     this.valeur = valeur;
+    //     this.fileEditor = fileEditor;
+    //     this.commandName = commandName;
+    // }
+    // }
+
 }
 
