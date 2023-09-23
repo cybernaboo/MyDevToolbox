@@ -1,0 +1,2 @@
+Liste des fonctionnalités que je veux ajouter à mon projet C# WPF :
+- pourquoi je ne vois rien s'afficher dans les combos

@@ -1,3 +1,427 @@
 Liste des fonctionnalités que je veux ajouter à mon projet C# WPF :
-- Un bouton supplémentaire sous le bouton "exécuter la commande" pour enregistrer dans le fichier config.xml, ce setup de commande avec les 4 paramètres dans une rubrique "bookmarks" du fichier config.xml
-- A coté de ce nouveau bouton,  il faut un champ de saisie description, ce champ sera enregistré dans les bookmarks en même temps que les 4 paramètres
+- pourquoi je ne vois rien s'afficher dans les combos
+
+*** Fichier MainWindow.xaml ***
+
+﻿<Window x:Class="mdt.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="Far Developer Toolbox" Height="700" Width="1000">
+    <Grid>
+        <!--<Image Source="medias/mdt.png" Width="500" Height="300" />-->
+        <TabControl>
+            <TabItem Header="FCD" Background="White">
+                <StackPanel Margin="20">
+                    <StackPanel.Resources>
+                        <Style TargetType="FrameworkElement" x:Key="CommonTextStyle">
+                        </Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource CommonTextStyle}">
+                        </Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource CommonTextStyle}">
+                        </Style>
+                    </StackPanel.Resources>
+                    <TextBlock Text="Paramètre 1:"/>
+                    <ComboBox x:Name="cmbParametre1" ItemsSource="{Binding}" DisplayMemberPath="Libelle"/>
+                    <TextBlock Text="Paramètre 2:"/>
+                    <ComboBox x:Name="cmbParametre2" ItemsSource="{Binding}" DisplayMemberPath="Libelle" Background="Green"/>
+                    <TextBlock Text="Paramètre 3:"/>
+                    <ComboBox x:Name="cmbParametre3" ItemsSource="{Binding}" DisplayMemberPath="Libelle" Background="Green"/>
+                    <TextBlock Text="Paramètre 4:"/>
+                    <ComboBox x:Name="cmbParametre4" ItemsSource="{Binding}" DisplayMemberPath="Libelle" Background="Green"/>
+                    <Button Content="Exécuter la commande" Click="ExecuterCommande_Click" Width="200" Margin="10"/>
+                    <Button Content="Enregistrer dans les bookmarks" Click="EnregistrerDansBookmarks_Click" Width="200" Margin="10"/>
+                    <TextBox x:Name="txtDescription" Width="300" Height="25" Margin="10"/>
+                    <TextBlock Text="Commande à exécuter:"/>
+                    <TextBox x:Name="txtCommande" IsReadOnly="True"/>
+                    <TextBlock Text="Sortie de la commande:" Margin="0,10,0,0"/>
+                    <TextBox x:Name="txtSortieCmd" IsReadOnly="True" Height="150"/>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="Bookmarks" Background="White">
+                <StackPanel Margin="20">
+                    <StackPanel.Resources>
+                        <Style TargetType="FrameworkElement" x:Key="CommonTextStyle">
+                        </Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource CommonTextStyle}">
+                        </Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource CommonTextStyle}">
+                        </Style>
+                    </StackPanel.Resources>
+                    <TextBlock Text="Bookmark : "/>
+                    <ComboBox x:Name="cmbBookmark" ItemsSource="{Binding}" DisplayMemberPath="Libelle"/>
+                    <Button Content="Exécuter la commande" Click="ExecuterCommande_Click" Width="200" Margin="10"/>
+                    <!-- <Button Content="Supprimer le bookmark" Click="SupprimerDesBookmarks_Click" Width="200" Margin="10"/> -->
+                    <TextBox x:Name="txtCommandeBookmark" IsReadOnly="True"/>
+                    <TextBlock Text="Sortie de la commande:" Margin="0,10,0,0"/>
+                    <TextBox x:Name="txtSortieBookmark" IsReadOnly="True" Height="150"/>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="Files">
+                <Grid>
+                    <StackPanel Margin="20">
+                        <StackPanel.Resources>
+                            <!-- Vos styles ici -->
+                        </StackPanel.Resources>
+                        <TextBlock Text="Liste des fichiers :" Foreground="White"/>
+                        <StackPanel x:Name="fileListStackPanel" Background="Black">
+                            <ListView x:Name="listViewFiles" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Commands" Background="White" Foreground="Green">
+                <TabItem.Style>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Background" Value="White" />
+                        <Setter Property="Foreground" Value="Black" />
+                    </Style>
+                </TabItem.Style>
+                <!-- Aucun contenu dans cet onglet -->
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
+
+*** Fichier MainWindow.xaml.cs ***
+
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection.Metadata;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Xml;
+
+namespace mdt
+{
+    public partial class MainWindow : Window
+    {
+        static public string? fileEditor;
+        static public string? commandName;
+        static string cheminFichierConfig = "config.xml";
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            ChargerDonneesDepuisXML();
+        }
+
+        private void ChargerDonneesDepuisXML()
+        {
+            try
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(cheminFichierConfig);
+
+                RemplirListeDepuisXML(xmlDoc, "Parameter1", cmbParametre1);
+                RemplirListeDepuisXML(xmlDoc, "Parameter2", cmbParametre2);
+                RemplirListeDepuisXML(xmlDoc, "Parameter3", cmbParametre3);
+                RemplirListeDepuisXML(xmlDoc, "Parameter4", cmbParametre4);
+
+                ChargerFichiersDepuisXML(xmlDoc);
+                ChargerParmetresDepuisXML(xmlDoc);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement des données depuis le fichier XML : {ex.Message}");
+            }
+        }
+
+        private static void ChargerParmetresDepuisXML(XmlDocument xmlDoc)
+        {
+            try
+            {
+                fileEditor = xmlDoc.SelectSingleNode("//FileEditor")?.InnerText;
+                if (fileEditor == null)
+                {
+                    MessageBox.Show($"Pas de paramètre Editeur de fichier défini dans le fichier de paramétrage");
+                    return;
+                }
+                commandName = xmlDoc.SelectSingleNode("//Command")?.InnerText;
+                if (commandName == null)
+                {
+                    MessageBox.Show($"Pas de Commande système défini dans le fichier de paramétrage");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement des paramètres depuis le fichier XML : {ex.Message}");
+            }
+        }
+
+        private static void RemplirListeDepuisXML(XmlDocument xmlDoc, string nodeName, System.Windows.Controls.ComboBox comboBox)
+        {
+            XmlNodeList? nodes = xmlDoc.SelectNodes($"//{nodeName}/Item");
+            var parametres = new List<Parametre>();
+            if (nodes == null)
+            {
+                return;
+            }
+            foreach (XmlNode node in nodes)
+            {
+                string? libelle = node.SelectSingleNode("Libelle")?.InnerText;
+                string? valeur = node.SelectSingleNode("Valeur")?.InnerText;
+
+                if (libelle != null && valeur != null)
+                {
+                    parametres.Add(new Parametre(libelle, valeur));
+                }
+            }
+
+            comboBox.ItemsSource = parametres;
+            comboBox.DisplayMemberPath = "Libelle";
+            comboBox.SelectedIndex = 0;
+        }
+
+        private void ChargerFichiersDepuisXML(XmlDocument xmlDoc)
+        {
+            try
+            {
+                XmlNodeList? fileNodes = xmlDoc.SelectNodes("//Files/File");
+                if (fileNodes == null)
+                {
+                    return;
+                }
+                foreach (XmlNode fileNode in fileNodes)
+                {
+                    string? fileName = fileNode.SelectSingleNode("FileName")?.InnerText;
+                    if (!string.IsNullOrEmpty(fileName))
+                    {
+                        Button fileButton = new Button
+                        {
+                            Content = fileName,
+                            Style = (Style)Resources["FileButtonStyle"]
+                        };
+
+                        fileButton.Click += async (sender, e) =>
+                        {
+                            string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+                            string commande = $"{fileEditor} {filePath}";
+                            Console.WriteLine($"Commande : {commande}");
+                            //string commande = $"C:\\Program Files\\Notepad++\\notepad++.exe {filePath}";
+                            string sortie = await Task.Run(() => ExecuterCommandeShell(commande));
+                            Console.WriteLine($"Sortie : {sortie}");
+                            //Process.Start("notepad++.exe " + filePath);
+                        };
+
+                        fileListStackPanel.Children.Add(fileButton);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement des fichiers depuis le fichier XML : {ex.Message}");
+            }
+        }
+
+        private void ExecuterCommande_Click(object sender, RoutedEventArgs e)
+        {
+            Parametre? parametre1 = cmbParametre1.SelectedValue as Parametre;
+            Parametre? parametre2 = cmbParametre2.SelectedValue as Parametre;
+            Parametre? parametre3 = cmbParametre3.SelectedValue as Parametre;
+            Parametre? parametre4 = cmbParametre4.SelectedValue as Parametre;
+
+            if (parametre1 != null && parametre2 != null && parametre3 != null && parametre4 != null)
+            {
+                string commande = $"{commandName} {parametre1.valeur} {parametre2.valeur} {parametre3.valeur} {parametre4.valeur}";
+
+                txtCommande.Text = commande;
+
+                string sortie = ExecuterCommandeShell(commande);
+                txtSortieCmd.Text = sortie;
+            }
+        }
+
+        private static string ExecuterCommandeShell(string commande)
+        {
+            try
+            {
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = false
+                };
+
+                Process process = new Process
+                {
+                    StartInfo = startInfo
+                };
+
+                process.Start();
+
+                StreamWriter sw = process.StandardInput;
+                StreamReader sr = process.StandardOutput;
+
+                sw.WriteLine(commande);
+                sw.Close();
+
+                string sortie = sr.ReadToEnd();
+                sr.Close();
+
+                //await Task.Run(() => process.WaitForExit());
+
+                return sortie;
+            }
+            catch (Exception ex)
+            {
+                return $"Erreur lors de l'exécution de la commande : {ex.Message}";
+            }
+        }
+        private void EnregistrerDansBookmarks_Click(object sender, RoutedEventArgs e)
+        {
+            Parametre? parametre1 = cmbParametre1.SelectedValue as Parametre;
+            Parametre? parametre2 = cmbParametre2.SelectedValue as Parametre;
+            Parametre? parametre3 = cmbParametre3.SelectedValue as Parametre;
+            Parametre? parametre4 = cmbParametre4.SelectedValue as Parametre;
+            string description = txtDescription.Text; // Obtenir la description depuis le champ de saisie
+
+            if (parametre1 != null && parametre2 != null && parametre3 != null && parametre4 != null)
+            {
+                // Créez un nouvel élément XML pour le bookmark avec les paramètres et la description
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(cheminFichierConfig);
+
+                XmlElement? bookmarks = xmlDoc.SelectSingleNode("//Bookmarks") as XmlElement;
+
+                // if (xmlDoc.SelectSingleNode("//Config/Bookmarks") == null)
+                // {
+                //     bookmarks = xmlDoc.CreateElement("Bookmarks");
+                //     xmlDoc.SelectSingleNode("//Config")?.AppendChild(bookmarks);
+                // }
+
+                XmlElement bookmark = xmlDoc.CreateElement("Bookmark");
+                bookmarks?.AppendChild(bookmark);
+
+                XmlElement bookmarkDescription = xmlDoc.CreateElement("Description");
+                bookmarkDescription.InnerText = description;
+                bookmark.AppendChild(bookmarkDescription);
+
+                XmlElement parameter1 = xmlDoc.CreateElement("Parameter1");
+                if (parametre1.valeur != null)
+                {
+                    parameter1.InnerText = parametre1.valeur;
+                    bookmark.AppendChild(parameter1);
+                }
+
+                if (parametre2.valeur != null)
+                {
+                    XmlElement parameter2 = xmlDoc.CreateElement("Parameter2");
+                    parameter2.InnerText = parametre2.valeur;
+                    bookmark.AppendChild(parameter2);
+                }
+
+                if (parametre3.valeur != null)
+                {
+                    XmlElement parameter3 = xmlDoc.CreateElement("Parameter3");
+                    parameter3.InnerText = parametre3.valeur;
+                    bookmark.AppendChild(parameter3);
+                }
+
+                if (parametre4.valeur != null)
+                {
+                    XmlElement parameter4 = xmlDoc.CreateElement("Parameter4");
+                    parameter4.InnerText = parametre4.valeur;
+                    bookmark.AppendChild(parameter4);
+                }
+
+                xmlDoc.SelectSingleNode("//Bookmarks")?.AppendChild(bookmark);
+
+                // Sauvegardez le fichier XML mis à jour
+                xmlDoc.Save(cheminFichierConfig);
+            }
+        }
+    }
+
+    public class Parametre
+    {
+        public string? libelle { get; set; }
+        public string? valeur { get; set; }
+        public Parametre(string parmLibelle, string parmValeur)
+        {
+            libelle = parmLibelle;
+            valeur = parmValeur;
+        }
+    }
+
+}
+
+
+*** Fichier config.xml ***
+
+﻿<Config>
+  <FileEditor>notepad++.exe</FileEditor>
+  <Command>Dir</Command>
+  <Parameter1>
+    <Item>
+      <Libelle>Option 1</Libelle>
+      <Valeur>Valeur1</Valeur>
+    </Item>
+    <Item>
+      <Libelle>Option 2</Libelle>
+      <Valeur>Valeur2</Valeur>
+    </Item>
+    <!-- Ajoutez d'autres Parameter ici -->
+  </Parameter1>
+  <Parameter2>
+    <Item>
+      <Libelle>OptionA</Libelle>
+      <Valeur>ValeurA</Valeur>
+    </Item>
+    <Item>
+      <Libelle>OptionB</Libelle>
+      <Valeur>ValeurB</Valeur>
+    </Item>
+    <!-- Ajoutez d'autres Parameter ici -->
+  </Parameter2>
+  <Parameter3>
+    <Item>
+      <Libelle>ItemX</Libelle>
+      <Valeur>ValueX</Valeur>
+    </Item>
+    <Item>
+      <Libelle>ItemY</Libelle>
+      <Valeur>ValueY</Valeur>
+    </Item>
+    <!-- Ajoutez d'autres Parameter ici -->
+  </Parameter3>
+  <Parameter4>
+    <Item>
+      <Libelle>ItemX</Libelle>
+      <Valeur>ValueX</Valeur>
+    </Item>
+    <Item>
+      <Libelle>ItemY</Libelle>
+      <Valeur>ValueY</Valeur>
+    </Item>
+    <!-- Ajoutez d'autres Parameter ici -->
+  </Parameter4>
+  <Files>
+    <File>
+      <FileName>C:\Users\cybernaboo\Desktop\a.txt</FileName>
+    </File>
+    <File>
+      <FileName>C:\Users\cybernaboo\Desktop\b.txt</FileName>
+    </File>
+  </Files>
+  <Bookmarks>
+    <Bookmark>
+      <Description>zzz</Description>
+      <Parameter1>Valeur1</Parameter1>
+      <Parameter2>ValeurA</Parameter2>
+      <Parameter3>ValueX</Parameter3>
+      <Parameter4>ValueX</Parameter4>
+    </Bookmark>
+  </Bookmarks>
+</Config>

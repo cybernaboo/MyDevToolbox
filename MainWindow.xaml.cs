@@ -36,7 +36,8 @@ namespace mdt
                 RemplirListeDepuisXML(xmlDoc, "Parameter4", cmbParametre4);
 
                 ChargerFichiersDepuisXML(xmlDoc);
-                ChargerParmetresDepuisXML(xmlDoc);
+                ChargerParametresDepuisXML(xmlDoc);
+                ChargerBookmarksDepuisXML();
             }
             catch (Exception ex)
             {
@@ -44,7 +45,53 @@ namespace mdt
             }
         }
 
-        private static void ChargerParmetresDepuisXML(XmlDocument xmlDoc)
+        private static void ChargerBookmarksDepuisXML()
+        {
+            try
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(cheminFichierConfig);
+
+                XmlNodeList? bookmarkNodes = xmlDoc.SelectNodes("//Bookmarks/Bookmark");
+                if (bookmarkNodes == null)
+                {
+                    return;
+                }
+                foreach (XmlNode bookmarkNode in bookmarkNodes)
+                {
+                    string? description = bookmarkNode.SelectSingleNode("Description")?.InnerText;
+                    string? parameter1 = bookmarkNode.SelectSingleNode("Parameter1")?.InnerText;
+                    string? parameter2 = bookmarkNode.SelectSingleNode("Parameter2")?.InnerText;
+                    string? parameter3 = bookmarkNode.SelectSingleNode("Parameter3")?.InnerText;
+                    string? parameter4 = bookmarkNode.SelectSingleNode("Parameter4")?.InnerText;
+
+                    if (description != null && parameter1 != null && parameter2 != null && parameter3 != null && parameter4 != null)
+                    {
+                        Button bookmarkButton = new Button
+                        {
+                            Content = description,
+                            Style = (Style)Application.Current.Resources["BookmarkButtonStyle"]
+                        };
+
+                        bookmarkButton.Click += async (sender, e) =>
+                        {
+                            string commande = $"{commandName} {parameter1} {parameter2} {parameter3} {parameter4}";
+                            Console.WriteLine($"Commande : {commande}");
+                            string sortie = await Task.Run(() => ExecuterCommandeShell(commande));
+                            Console.WriteLine($"Sortie : {sortie}");
+                        };
+
+                        bookmarkListStackPanel.Children.Add(bookmarkButton);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement des bookmarks depuis le fichier XML : {ex.Message}");
+            }
+        }
+
+        private static void ChargerParametresDepuisXML(XmlDocument xmlDoc)
         {
             try
             {
@@ -87,7 +134,7 @@ namespace mdt
             }
 
             comboBox.ItemsSource = parametres;
-            comboBox.DisplayMemberPath = "Libelle";
+            comboBox.DisplayMemberPath = "libelle";
             comboBox.SelectedIndex = 0;
         }
 
@@ -141,12 +188,12 @@ namespace mdt
 
             if (parametre1 != null && parametre2 != null && parametre3 != null && parametre4 != null)
             {
-                string commande = $"{commandName} {parametre1.Valeur} {parametre2.Valeur} {parametre3.Valeur} {parametre4.Valeur}";
+                string commande = $"{commandName} {parametre1.valeur} {parametre2.valeur} {parametre3.valeur} {parametre4.valeur}";
 
                 txtCommande.Text = commande;
 
                 string sortie = ExecuterCommandeShell(commande);
-                txtSortie.Text = sortie;
+                txtSortieCmd.Text = sortie;
             }
         }
 
@@ -190,71 +237,86 @@ namespace mdt
         }
         private void EnregistrerDansBookmarks_Click(object sender, RoutedEventArgs e)
         {
-            Parametre? parametre1 = cmbParametre1.SelectedValue as Parametre;
-            Parametre? parametre2 = cmbParametre2.SelectedValue as Parametre;
-            Parametre? parametre3 = cmbParametre3.SelectedValue as Parametre;
-            Parametre? parametre4 = cmbParametre4.SelectedValue as Parametre;
-            string description = txtDescription.Text; // Obtenir la description depuis le champ de saisie
-
-            if (parametre1 != null && parametre2 != null && parametre3 != null && parametre4 != null)
+            try
             {
-                // Créez un nouvel élément XML pour le bookmark avec les paramètres et la description
-                XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(cheminFichierConfig);
+                Parametre? parametre1 = cmbParametre1.SelectedValue as Parametre;
+                Parametre? parametre2 = cmbParametre2.SelectedValue as Parametre;
+                Parametre? parametre3 = cmbParametre3.SelectedValue as Parametre;
+                Parametre? parametre4 = cmbParametre4.SelectedValue as Parametre;
+                string description = txtDescription.Text; // Obtenir la description depuis le champ de saisie
 
-                XmlElement? bookmarks = xmlDoc.SelectSingleNode("//Bookmarks") as XmlElement;
+                if (parametre1 != null && parametre2 != null && parametre3 != null && parametre4 != null)
+                {
+                    // Créez un nouvel élément XML pour le bookmark avec les paramètres et la description
+                    XmlDocument xmlDoc = new XmlDocument();
+                    xmlDoc.Load(cheminFichierConfig);
 
-                // if (xmlDoc.SelectSingleNode("//Config/Bookmarks") == null)
-                // {
-                //     bookmarks = xmlDoc.CreateElement("Bookmarks");
-                //     xmlDoc.SelectSingleNode("//Config")?.AppendChild(bookmarks);
-                // }
+                    XmlElement? bookmarks = xmlDoc.SelectSingleNode("//Bookmarks") as XmlElement;
 
-                XmlElement bookmark = xmlDoc.CreateElement("Bookmark");
-                bookmarks?.AppendChild(bookmark);
+                    // if (xmlDoc.SelectSingleNode("//Config/Bookmarks") == null)
+                    // {
+                    //     bookmarks = xmlDoc.CreateElement("Bookmarks");
+                    //     xmlDoc.SelectSingleNode("//Config")?.AppendChild(bookmarks);
+                    // }
 
-                XmlElement bookmarkDescription = xmlDoc.CreateElement("Description");
-                bookmarkDescription.InnerText = description;
-                bookmark.AppendChild(bookmarkDescription);
+                    XmlElement bookmark = xmlDoc.CreateElement("Bookmark");
+                    bookmarks?.AppendChild(bookmark);
 
-                XmlElement parameter1 = xmlDoc.CreateElement("Parameter1");
-                parameter1.InnerText = parametre1.Valeur;
-                bookmark.AppendChild(parameter1);
+                    XmlElement bookmarkDescription = xmlDoc.CreateElement("Description");
+                    bookmarkDescription.InnerText = description;
+                    bookmark.AppendChild(bookmarkDescription);
 
-                XmlElement parameter2 = xmlDoc.CreateElement("Parameter2");
-                parameter2.InnerText = parametre2.Valeur;
-                bookmark.AppendChild(parameter2);
+                    XmlElement parameter1 = xmlDoc.CreateElement("Parameter1");
+                    if (parametre1.valeur != null)
+                    {
+                        parameter1.InnerText = parametre1.valeur;
+                        bookmark.AppendChild(parameter1);
+                    }
 
-                XmlElement parameter3 = xmlDoc.CreateElement("Parameter3");
-                parameter3.InnerText = parametre3.Valeur;
-                bookmark.AppendChild(parameter3);
+                    if (parametre2.valeur != null)
+                    {
+                        XmlElement parameter2 = xmlDoc.CreateElement("Parameter2");
+                        parameter2.InnerText = parametre2.valeur;
+                        bookmark.AppendChild(parameter2);
+                    }
 
-                XmlElement parameter4 = xmlDoc.CreateElement("Parameter4");
-                parameter4.InnerText = parametre4.Valeur;
-                bookmark.AppendChild(parameter4);
-                xmlDoc.SelectSingleNode("//Bookmarks")?.AppendChild(bookmark);
+                    if (parametre3.valeur != null)
+                    {
+                        XmlElement parameter3 = xmlDoc.CreateElement("Parameter3");
+                        parameter3.InnerText = parametre3.valeur;
+                        bookmark.AppendChild(parameter3);
+                    }
 
-                // Sauvegardez le fichier XML mis à jour
-                xmlDoc.Save(cheminFichierConfig);
+                    if (parametre4.valeur != null)
+                    {
+                        XmlElement parameter4 = xmlDoc.CreateElement("Parameter4");
+                        parameter4.InnerText = parametre4.valeur;
+                        bookmark.AppendChild(parameter4);
+                    }
+
+                    xmlDoc.SelectSingleNode("//Bookmarks")?.AppendChild(bookmark);
+
+                    // Sauvegardez le fichier XML mis à jour
+                    xmlDoc.Save(cheminFichierConfig);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de l'enregistrement du bookmark : {ex.Message}");
             }
         }
     }
 
-    // public class Parametres
-    // {
-    //     public string? libelle { get; set; }
-    //     public string? valeur { get; set; }
-    //     public string? fileEditor { get; set; }
-    //     public string? commandName { get; set; }
-
-    // public Parametres(string libelle, string valeur, string fileEditor, string commandName)
-    // {
-    //     this.libelle = libelle;
-    //     this.valeur = valeur;
-    //     this.fileEditor = fileEditor;
-    //     this.commandName = commandName;
-    // }
-    // }
+    public class Parametre
+    {
+        public string? libelle { get; set; }
+        public string? valeur { get; set; }
+        public Parametre(string parmLibelle, string parmValeur)
+        {
+            libelle = parmLibelle;
+            valeur = parmValeur;
+        }
+    }
 
 }
 

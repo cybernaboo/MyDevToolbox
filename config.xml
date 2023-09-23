@@ -1,4 +1,3 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <Config>
   <FileEditor>notepad++.exe</FileEditor>
   <Command>Dir</Command>
@@ -56,7 +55,21 @@
   </Files>
   <Bookmarks>
     <Bookmark>
-      <Description>zzz</Description>
+      <Description>yyy</Description>
+      <Parameter1>Valeur1</Parameter1>
+      <Parameter2>ValeurA</Parameter2>
+      <Parameter3>ValueX</Parameter3>
+      <Parameter4>ValueY</Parameter4>
+    </Bookmark>
+    <Bookmark>
+      <Description>eee</Description>
+      <Parameter1>Valeur1</Parameter1>
+      <Parameter2>ValeurA</Parameter2>
+      <Parameter3>ValueX</Parameter3>
+      <Parameter4>ValueY</Parameter4>
+    </Bookmark>
+    <Bookmark>
+      <Description>tttt</Description>
       <Parameter1>Valeur1</Parameter1>
       <Parameter2>ValeurA</Parameter2>
       <Parameter3>ValueX</Parameter3>
