@@ -1,6 +1,5 @@
 Liste des fonctionnalités que je veux ajouter à mon projet C# WPF :
-- pourquoi je ne vois rien s'afficher dans les combos
-
+- pour l'onglet Files, j'aimerais que la liste soit composée d'un champ texte en read only et d'un bouton pour ouvrir le fichier dans le bloc note
 *** Fichier MainWindow.xaml ***
 
 ﻿<Window x:Class="mdt.MainWindow"
@@ -23,13 +22,13 @@ Liste des fonctionnalités que je veux ajouter à mon projet C# WPF :
                         </Style>
                     </StackPanel.Resources>
                     <TextBlock Text="Paramètre 1:"/>
-                    <ComboBox x:Name="cmbParametre1" ItemsSource="{Binding}" DisplayMemberPath="Libelle"/>
+                    <ComboBox x:Name="cmbParametre1" ItemsSource="{Binding}" DisplayMemberPath="libelle"/>
                     <TextBlock Text="Paramètre 2:"/>
-                    <ComboBox x:Name="cmbParametre2" ItemsSource="{Binding}" DisplayMemberPath="Libelle" Background="Green"/>
+                    <ComboBox x:Name="cmbParametre2" ItemsSource="{Binding}" DisplayMemberPath="libelle" Background="Green"/>
                     <TextBlock Text="Paramètre 3:"/>
-                    <ComboBox x:Name="cmbParametre3" ItemsSource="{Binding}" DisplayMemberPath="Libelle" Background="Green"/>
+                    <ComboBox x:Name="cmbParametre3" ItemsSource="{Binding}" DisplayMemberPath="libelle" Background="Green"/>
                     <TextBlock Text="Paramètre 4:"/>
-                    <ComboBox x:Name="cmbParametre4" ItemsSource="{Binding}" DisplayMemberPath="Libelle" Background="Green"/>
+                    <ComboBox x:Name="cmbParametre4" ItemsSource="{Binding}" DisplayMemberPath="libelle" Background="Green"/>
                     <Button Content="Exécuter la commande" Click="ExecuterCommande_Click" Width="200" Margin="10"/>
                     <Button Content="Enregistrer dans les bookmarks" Click="EnregistrerDansBookmarks_Click" Width="200" Margin="10"/>
                     <TextBox x:Name="txtDescription" Width="300" Height="25" Margin="10"/>
@@ -41,23 +40,17 @@ Liste des fonctionnalités que je veux ajouter à mon projet C# WPF :
             </TabItem>
 
             <TabItem Header="Bookmarks" Background="White">
-                <StackPanel Margin="20">
-                    <StackPanel.Resources>
-                        <Style TargetType="FrameworkElement" x:Key="CommonTextStyle">
-                        </Style>
-                        <Style TargetType="TextBlock" BasedOn="{StaticResource CommonTextStyle}">
-                        </Style>
-                        <Style TargetType="TextBox" BasedOn="{StaticResource CommonTextStyle}">
-                        </Style>
-                    </StackPanel.Resources>
-                    <TextBlock Text="Bookmark : "/>
-                    <ComboBox x:Name="cmbBookmark" ItemsSource="{Binding}" DisplayMemberPath="Libelle"/>
-                    <Button Content="Exécuter la commande" Click="ExecuterCommande_Click" Width="200" Margin="10"/>
-                    <!-- <Button Content="Supprimer le bookmark" Click="SupprimerDesBookmarks_Click" Width="200" Margin="10"/> -->
-                    <TextBox x:Name="txtCommandeBookmark" IsReadOnly="True"/>
-                    <TextBlock Text="Sortie de la commande:" Margin="0,10,0,0"/>
-                    <TextBox x:Name="txtSortieBookmark" IsReadOnly="True" Height="150"/>
-                </StackPanel>
+                <Grid>
+                    <StackPanel Margin="20">
+                        <StackPanel.Resources>
+                            <!-- Vos styles ici -->
+                        </StackPanel.Resources>
+                        <TextBlock Text="Liste des bookmarks :" Foreground="White"/>
+                        <StackPanel x:Name="bookmarkListStackPanel" Background="Black">
+                            <ListView x:Name="listViewBookmarks" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
             </TabItem>
 
             <TabItem Header="Files">
@@ -108,13 +101,14 @@ namespace mdt
         static public string? commandName;
         static string cheminFichierConfig = "config.xml";
 
-        public MainWindow()
+q        public MainWindow()
         {
             InitializeComponent();
             ChargerDonneesDepuisXML();
+            ChargerBookmarksDepuisXML();
         }
 
-        private void ChargerDonneesDepuisXML()
+        void ChargerDonneesDepuisXML()
         {
             try
             {
@@ -127,7 +121,7 @@ namespace mdt
                 RemplirListeDepuisXML(xmlDoc, "Parameter4", cmbParametre4);
 
                 ChargerFichiersDepuisXML(xmlDoc);
-                ChargerParmetresDepuisXML(xmlDoc);
+                ChargerParametresDepuisXML(xmlDoc);
             }
             catch (Exception ex)
             {
@@ -135,7 +129,53 @@ namespace mdt
             }
         }
 
-        private static void ChargerParmetresDepuisXML(XmlDocument xmlDoc)
+        void ChargerBookmarksDepuisXML()
+        {
+            try
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(cheminFichierConfig);
+
+                XmlNodeList? bookmarkNodes = xmlDoc.SelectNodes("//Bookmarks/Bookmark");
+                if (bookmarkNodes == null)
+                {
+                    return;
+                }
+                foreach (XmlNode bookmarkNode in bookmarkNodes)
+                {
+                    string? description = bookmarkNode.SelectSingleNode("Description")?.InnerText;
+                    string? parameter1 = bookmarkNode.SelectSingleNode("Parameter1")?.InnerText;
+                    string? parameter2 = bookmarkNode.SelectSingleNode("Parameter2")?.InnerText;
+                    string? parameter3 = bookmarkNode.SelectSingleNode("Parameter3")?.InnerText;
+                    string? parameter4 = bookmarkNode.SelectSingleNode("Parameter4")?.InnerText;
+
+                    if (description != null && parameter1 != null && parameter2 != null && parameter3 != null && parameter4 != null)
+                    {
+                        Button bookmarkButton = new Button
+                        {
+                            Content = description,
+                            Style = (Style)Application.Current.Resources["BookmarkButtonStyle"]
+                        };
+
+                        bookmarkButton.Click += async (sender, e) =>
+                        {
+                            string commande = $"{commandName} {parameter1} {parameter2} {parameter3} {parameter4}";
+                            Console.WriteLine($"Commande : {commande}");
+                            string sortie = await Task.Run(() => ExecuterCommandeShell(commande));
+                            Console.WriteLine($"Sortie : {sortie}");
+                        };
+
+                        bookmarkListStackPanel.Children.Add(bookmarkButton);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement des bookmarks depuis le fichier XML : {ex.Message}");
+            }
+        }
+
+        void ChargerParametresDepuisXML(XmlDocument xmlDoc)
         {
             try
             {
@@ -158,7 +198,7 @@ namespace mdt
             }
         }
 
-        private static void RemplirListeDepuisXML(XmlDocument xmlDoc, string nodeName, System.Windows.Controls.ComboBox comboBox)
+        void RemplirListeDepuisXML(XmlDocument xmlDoc, string nodeName, System.Windows.Controls.ComboBox comboBox)
         {
             XmlNodeList? nodes = xmlDoc.SelectNodes($"//{nodeName}/Item");
             var parametres = new List<Parametre>();
@@ -178,11 +218,11 @@ namespace mdt
             }
 
             comboBox.ItemsSource = parametres;
-            comboBox.DisplayMemberPath = "Libelle";
+            comboBox.DisplayMemberPath = "libelle";
             comboBox.SelectedIndex = 0;
         }
 
-        private void ChargerFichiersDepuisXML(XmlDocument xmlDoc)
+        void ChargerFichiersDepuisXML(XmlDocument xmlDoc)
         {
             try
             {
@@ -206,11 +246,7 @@ namespace mdt
                         {
                             string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
                             string commande = $"{fileEditor} {filePath}";
-                            Console.WriteLine($"Commande : {commande}");
-                            //string commande = $"C:\\Program Files\\Notepad++\\notepad++.exe {filePath}";
                             string sortie = await Task.Run(() => ExecuterCommandeShell(commande));
-                            Console.WriteLine($"Sortie : {sortie}");
-                            //Process.Start("notepad++.exe " + filePath);
                         };
 
                         fileListStackPanel.Children.Add(fileButton);
@@ -223,7 +259,7 @@ namespace mdt
             }
         }
 
-        private void ExecuterCommande_Click(object sender, RoutedEventArgs e)
+        void ExecuterCommande_Click(object sender, RoutedEventArgs e)
         {
             Parametre? parametre1 = cmbParametre1.SelectedValue as Parametre;
             Parametre? parametre2 = cmbParametre2.SelectedValue as Parametre;
@@ -241,7 +277,7 @@ namespace mdt
             }
         }
 
-        private static string ExecuterCommandeShell(string commande)
+        static string ExecuterCommandeShell(string commande)
         {
             try
             {
@@ -279,67 +315,75 @@ namespace mdt
                 return $"Erreur lors de l'exécution de la commande : {ex.Message}";
             }
         }
-        private void EnregistrerDansBookmarks_Click(object sender, RoutedEventArgs e)
+
+        void EnregistrerDansBookmarks_Click(object sender, RoutedEventArgs e)
         {
-            Parametre? parametre1 = cmbParametre1.SelectedValue as Parametre;
-            Parametre? parametre2 = cmbParametre2.SelectedValue as Parametre;
-            Parametre? parametre3 = cmbParametre3.SelectedValue as Parametre;
-            Parametre? parametre4 = cmbParametre4.SelectedValue as Parametre;
-            string description = txtDescription.Text; // Obtenir la description depuis le champ de saisie
-
-            if (parametre1 != null && parametre2 != null && parametre3 != null && parametre4 != null)
+            try
             {
-                // Créez un nouvel élément XML pour le bookmark avec les paramètres et la description
-                XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(cheminFichierConfig);
+                Parametre? parametre1 = cmbParametre1.SelectedValue as Parametre;
+                Parametre? parametre2 = cmbParametre2.SelectedValue as Parametre;
+                Parametre? parametre3 = cmbParametre3.SelectedValue as Parametre;
+                Parametre? parametre4 = cmbParametre4.SelectedValue as Parametre;
+                string description = txtDescription.Text; // Obtenir la description depuis le champ de saisie
 
-                XmlElement? bookmarks = xmlDoc.SelectSingleNode("//Bookmarks") as XmlElement;
-
-                // if (xmlDoc.SelectSingleNode("//Config/Bookmarks") == null)
-                // {
-                //     bookmarks = xmlDoc.CreateElement("Bookmarks");
-                //     xmlDoc.SelectSingleNode("//Config")?.AppendChild(bookmarks);
-                // }
-
-                XmlElement bookmark = xmlDoc.CreateElement("Bookmark");
-                bookmarks?.AppendChild(bookmark);
-
-                XmlElement bookmarkDescription = xmlDoc.CreateElement("Description");
-                bookmarkDescription.InnerText = description;
-                bookmark.AppendChild(bookmarkDescription);
-
-                XmlElement parameter1 = xmlDoc.CreateElement("Parameter1");
-                if (parametre1.valeur != null)
+                if (parametre1 != null && parametre2 != null && parametre3 != null && parametre4 != null)
                 {
-                    parameter1.InnerText = parametre1.valeur;
-                    bookmark.AppendChild(parameter1);
+                    // Créez un nouvel élément XML pour le bookmark avec les paramètres et la description
+                    XmlDocument xmlDoc = new XmlDocument();
+                    xmlDoc.Load(cheminFichierConfig);
+
+                    XmlElement? bookmarks = xmlDoc.SelectSingleNode("//Bookmarks") as XmlElement;
+
+                    // if (xmlDoc.SelectSingleNode("//Config/Bookmarks") == null)
+                    // {
+                    //     bookmarks = xmlDoc.CreateElement("Bookmarks");
+                    //     xmlDoc.SelectSingleNode("//Config")?.AppendChild(bookmarks);
+                    // }
+
+                    XmlElement bookmark = xmlDoc.CreateElement("Bookmark");
+                    bookmarks?.AppendChild(bookmark);
+
+                    XmlElement bookmarkDescription = xmlDoc.CreateElement("Description");
+                    bookmarkDescription.InnerText = description;
+                    bookmark.AppendChild(bookmarkDescription);
+
+                    XmlElement parameter1 = xmlDoc.CreateElement("Parameter1");
+                    if (parametre1.valeur != null)
+                    {
+                        parameter1.InnerText = parametre1.valeur;
+                        bookmark.AppendChild(parameter1);
+                    }
+
+                    if (parametre2.valeur != null)
+                    {
+                        XmlElement parameter2 = xmlDoc.CreateElement("Parameter2");
+                        parameter2.InnerText = parametre2.valeur;
+                        bookmark.AppendChild(parameter2);
+                    }
+
+                    if (parametre3.valeur != null)
+                    {
+                        XmlElement parameter3 = xmlDoc.CreateElement("Parameter3");
+                        parameter3.InnerText = parametre3.valeur;
+                        bookmark.AppendChild(parameter3);
+                    }
+
+                    if (parametre4.valeur != null)
+                    {
+                        XmlElement parameter4 = xmlDoc.CreateElement("Parameter4");
+                        parameter4.InnerText = parametre4.valeur;
+                        bookmark.AppendChild(parameter4);
+                    }
+
+                    xmlDoc.SelectSingleNode("//Bookmarks")?.AppendChild(bookmark);
+
+                    // Sauvegardez le fichier XML mis à jour
+                    xmlDoc.Save(cheminFichierConfig);
                 }
-
-                if (parametre2.valeur != null)
-                {
-                    XmlElement parameter2 = xmlDoc.CreateElement("Parameter2");
-                    parameter2.InnerText = parametre2.valeur;
-                    bookmark.AppendChild(parameter2);
-                }
-
-                if (parametre3.valeur != null)
-                {
-                    XmlElement parameter3 = xmlDoc.CreateElement("Parameter3");
-                    parameter3.InnerText = parametre3.valeur;
-                    bookmark.AppendChild(parameter3);
-                }
-
-                if (parametre4.valeur != null)
-                {
-                    XmlElement parameter4 = xmlDoc.CreateElement("Parameter4");
-                    parameter4.InnerText = parametre4.valeur;
-                    bookmark.AppendChild(parameter4);
-                }
-
-                xmlDoc.SelectSingleNode("//Bookmarks")?.AppendChild(bookmark);
-
-                // Sauvegardez le fichier XML mis à jour
-                xmlDoc.Save(cheminFichierConfig);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de l'enregistrement du bookmark : {ex.Message}");
             }
         }
     }
@@ -354,13 +398,12 @@ namespace mdt
             valeur = parmValeur;
         }
     }
-
 }
 
 
 *** Fichier config.xml ***
 
-﻿<Config>
+<Config>
   <FileEditor>notepad++.exe</FileEditor>
   <Command>Dir</Command>
   <Parameter1>
@@ -417,7 +460,21 @@ namespace mdt
   </Files>
   <Bookmarks>
     <Bookmark>
-      <Description>zzz</Description>
+      <Description>yyy</Description>
+      <Parameter1>Valeur1</Parameter1>
+      <Parameter2>ValeurA</Parameter2>
+      <Parameter3>ValueX</Parameter3>
+      <Parameter4>ValueY</Parameter4>
+    </Bookmark>
+    <Bookmark>
+      <Description>eee</Description>
+      <Parameter1>Valeur1</Parameter1>
+      <Parameter2>ValeurA</Parameter2>
+      <Parameter3>ValueX</Parameter3>
+      <Parameter4>ValueY</Parameter4>
+    </Bookmark>
+    <Bookmark>
+      <Description>tttt</Description>
       <Parameter1>Valeur1</Parameter1>
       <Parameter2>ValeurA</Parameter2>
       <Parameter3>ValueX</Parameter3>

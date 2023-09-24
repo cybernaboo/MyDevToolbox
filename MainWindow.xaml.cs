@@ -17,13 +17,14 @@ namespace mdt
         static public string? commandName;
         static string cheminFichierConfig = "config.xml";
 
-        public MainWindow()
+q        public MainWindow()
         {
             InitializeComponent();
             ChargerDonneesDepuisXML();
+            ChargerBookmarksDepuisXML();
         }
 
-        private void ChargerDonneesDepuisXML()
+        void ChargerDonneesDepuisXML()
         {
             try
             {
@@ -37,7 +38,6 @@ namespace mdt
 
                 ChargerFichiersDepuisXML(xmlDoc);
                 ChargerParametresDepuisXML(xmlDoc);
-                ChargerBookmarksDepuisXML();
             }
             catch (Exception ex)
             {
@@ -45,7 +45,7 @@ namespace mdt
             }
         }
 
-        private static void ChargerBookmarksDepuisXML()
+        void ChargerBookmarksDepuisXML()
         {
             try
             {
@@ -91,7 +91,7 @@ namespace mdt
             }
         }
 
-        private static void ChargerParametresDepuisXML(XmlDocument xmlDoc)
+        void ChargerParametresDepuisXML(XmlDocument xmlDoc)
         {
             try
             {
@@ -114,7 +114,7 @@ namespace mdt
             }
         }
 
-        private static void RemplirListeDepuisXML(XmlDocument xmlDoc, string nodeName, System.Windows.Controls.ComboBox comboBox)
+        void RemplirListeDepuisXML(XmlDocument xmlDoc, string nodeName, System.Windows.Controls.ComboBox comboBox)
         {
             XmlNodeList? nodes = xmlDoc.SelectNodes($"//{nodeName}/Item");
             var parametres = new List<Parametre>();
@@ -138,7 +138,7 @@ namespace mdt
             comboBox.SelectedIndex = 0;
         }
 
-        private void ChargerFichiersDepuisXML(XmlDocument xmlDoc)
+        void ChargerFichiersDepuisXML(XmlDocument xmlDoc)
         {
             try
             {
@@ -162,11 +162,7 @@ namespace mdt
                         {
                             string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
                             string commande = $"{fileEditor} {filePath}";
-                            Console.WriteLine($"Commande : {commande}");
-                            //string commande = $"C:\\Program Files\\Notepad++\\notepad++.exe {filePath}";
                             string sortie = await Task.Run(() => ExecuterCommandeShell(commande));
-                            Console.WriteLine($"Sortie : {sortie}");
-                            //Process.Start("notepad++.exe " + filePath);
                         };
 
                         fileListStackPanel.Children.Add(fileButton);
@@ -179,7 +175,7 @@ namespace mdt
             }
         }
 
-        private void ExecuterCommande_Click(object sender, RoutedEventArgs e)
+        void ExecuterCommande_Click(object sender, RoutedEventArgs e)
         {
             Parametre? parametre1 = cmbParametre1.SelectedValue as Parametre;
             Parametre? parametre2 = cmbParametre2.SelectedValue as Parametre;
@@ -197,7 +193,7 @@ namespace mdt
             }
         }
 
-        private static string ExecuterCommandeShell(string commande)
+        static string ExecuterCommandeShell(string commande)
         {
             try
             {
@@ -235,7 +231,8 @@ namespace mdt
                 return $"Erreur lors de l'exécution de la commande : {ex.Message}";
             }
         }
-        private void EnregistrerDansBookmarks_Click(object sender, RoutedEventArgs e)
+
+        void EnregistrerDansBookmarks_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -317,6 +314,5 @@ namespace mdt
             valeur = parmValeur;
         }
     }
-
 }
 

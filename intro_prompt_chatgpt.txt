@@ -1,2 +1,2 @@
 Liste des fonctionnalités que je veux ajouter à mon projet C# WPF :
-- pourquoi je ne vois rien s'afficher dans les combos
+- pour l'onglet Files, j'aimerais que la liste soit composée d'un champ texte en read only et d'un bouton pour ouvrir le fichier dans le bloc note
