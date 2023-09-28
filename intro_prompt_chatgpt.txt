@@ -1,2 +1,2 @@
 Liste des fonctionnalités que je veux ajouter à mon projet C# WPF :
-- pour l'onglet Files, j'aimerais que la liste soit composée d'un champ texte en read only et d'un bouton pour ouvrir le fichier dans le bloc note
+- Je veux que dans l'onglet Files affiche une liste de tous les fichiers avec sur la même ligne le nom du fichier et un bouton pour ExecuterCommande_Click

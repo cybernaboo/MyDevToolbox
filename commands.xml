@@ -1,0 +1,5 @@
+<blabla>
+<line> fromCommand="aaa\bbb\ccc" postCommand="echo 'hello world'" </line>
+<line> fromCommand="ddd\eee\fff" postCommand="echo 'hello world'" </line>
+<line> fromCommand="ggg\hhh\iii" postCommand="echo 'hello world'" </line>
+</blabla>

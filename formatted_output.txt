@@ -1,0 +1,12 @@
+  <Item>
+    <Libelle>ccc</Libelle>
+    <Valeur>ccc</Valeur>
+  </Item>
+  <Item>
+    <Libelle>fff</Libelle>
+    <Valeur>fff</Valeur>
+  </Item>
+  <Item>
+    <Libelle>iii</Libelle>
+    <Valeur>iii</Valeur>
+  </Item>

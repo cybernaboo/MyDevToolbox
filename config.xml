@@ -3,7 +3,7 @@
   <Command>Dir</Command>
   <Parameter1>
     <Item>
-      <Libelle>Option 1</Libelle>
+      <Libelle>Option 11</Libelle>
       <Valeur>Valeur1</Valeur>
     </Item>
     <Item>
@@ -60,20 +60,6 @@
       <Parameter2>ValeurA</Parameter2>
       <Parameter3>ValueX</Parameter3>
       <Parameter4>ValueY</Parameter4>
-    </Bookmark>
-    <Bookmark>
-      <Description>eee</Description>
-      <Parameter1>Valeur1</Parameter1>
-      <Parameter2>ValeurA</Parameter2>
-      <Parameter3>ValueX</Parameter3>
-      <Parameter4>ValueY</Parameter4>
-    </Bookmark>
-    <Bookmark>
-      <Description>tttt</Description>
-      <Parameter1>Valeur1</Parameter1>
-      <Parameter2>ValeurA</Parameter2>
-      <Parameter3>ValueX</Parameter3>
-      <Parameter4>ValueX</Parameter4>
     </Bookmark>
   </Bookmarks>
 </Config>

@@ -1,5 +1,5 @@
 Liste des fonctionnalités que je veux ajouter à mon projet C# WPF :
-- pour l'onglet Files, j'aimerais que la liste soit composée d'un champ texte en read only et d'un bouton pour ouvrir le fichier dans le bloc note
+- Je veux que dans l'onglet Files affiche une liste de tous les fichiers avec sur la même ligne le nom du fichier et un bouton pour ExecuterCommande_Click
 *** Fichier MainWindow.xaml ***
 
 ﻿<Window x:Class="mdt.MainWindow"
@@ -61,7 +61,28 @@ Liste des fonctionnalités que je veux ajouter à mon projet C# WPF :
                         </StackPanel.Resources>
                         <TextBlock Text="Liste des fichiers :" Foreground="White"/>
                         <StackPanel x:Name="fileListStackPanel" Background="Black">
-                            <ListView x:Name="listViewFiles" />
+                            <ListView x:Name="listViewFiles">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Header="Nom de fichier" Width="250">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding FilePath}" />
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="Actions" Width="100">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Button Content="Ouvrir" Click="OuvrirFichier_Click" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
                         </StackPanel>
                     </StackPanel>
                 </Grid>
@@ -101,7 +122,7 @@ namespace mdt
         static public string? commandName;
         static string cheminFichierConfig = "config.xml";
 
-q        public MainWindow()
+        public MainWindow()
         {
             InitializeComponent();
             ChargerDonneesDepuisXML();
@@ -222,40 +243,52 @@ q        public MainWindow()
             comboBox.SelectedIndex = 0;
         }
 
-        void ChargerFichiersDepuisXML(XmlDocument xmlDoc)
+
+        private void ChargerFichiersDepuisXML(XmlDocument xmlDoc)
         {
             try
             {
-                XmlNodeList? fileNodes = xmlDoc.SelectNodes("//Files/File");
+                XmlNodeList fileNodes = xmlDoc.SelectNodes("//Files/File");
                 if (fileNodes == null)
                 {
                     return;
                 }
+
+                List<FileItem> files = new List<FileItem>();
+
                 foreach (XmlNode fileNode in fileNodes)
                 {
                     string? fileName = fileNode.SelectSingleNode("FileName")?.InnerText;
                     if (!string.IsNullOrEmpty(fileName))
                     {
-                        Button fileButton = new Button
-                        {
-                            Content = fileName,
-                            Style = (Style)Resources["FileButtonStyle"]
-                        };
-
-                        fileButton.Click += async (sender, e) =>
-                        {
-                            string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
-                            string commande = $"{fileEditor} {filePath}";
-                            string sortie = await Task.Run(() => ExecuterCommandeShell(commande));
-                        };
-
-                        fileListStackPanel.Children.Add(fileButton);
+                        files.Add(new FileItem { FilePath = fileName });
                     }
                 }
+
+                listViewFiles.ItemsSource = files;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erreur lors du chargement des fichiers depuis le fichier XML : {ex.Message}");
+            }
+        }
+
+        private void OuvrirFichier_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            FileItem fileItem = (FileItem)button.DataContext; // Récupérer l'élément de la liste associé au bouton
+
+            // Vérifier si le fichier existe avant de l'ouvrir
+            if (File.Exists(fileItem.FilePath))
+            {
+                string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileItem.FilePath);
+                string commande = $"{fileEditor} {filePath}";
+                //string sortie = await Task.Run(() => ExecuterCommandeShell(commande));
+                //Process.Start("notepad.exe", fileItem.FilePath);
+            }
+            else
+            {
+                MessageBox.Show("Le fichier n'existe pas.");
             }
         }
 
@@ -334,12 +367,6 @@ q        public MainWindow()
 
                     XmlElement? bookmarks = xmlDoc.SelectSingleNode("//Bookmarks") as XmlElement;
 
-                    // if (xmlDoc.SelectSingleNode("//Config/Bookmarks") == null)
-                    // {
-                    //     bookmarks = xmlDoc.CreateElement("Bookmarks");
-                    //     xmlDoc.SelectSingleNode("//Config")?.AppendChild(bookmarks);
-                    // }
-
                     XmlElement bookmark = xmlDoc.CreateElement("Bookmark");
                     bookmarks?.AppendChild(bookmark);
 
@@ -379,6 +406,12 @@ q        public MainWindow()
 
                     // Sauvegardez le fichier XML mis à jour
                     xmlDoc.Save(cheminFichierConfig);
+                    ChargerBookmarksDepuisXML();
+                    // Réinitialiser les champs de saisie wpf bookmarkDescription
+                    txtDescription.Text = "";
+
+
+
                 }
             }
             catch (Exception ex)
@@ -387,7 +420,10 @@ q        public MainWindow()
             }
         }
     }
-
+    public class FileItem
+    {
+        public string? FilePath { get; set; }
+    }
     public class Parametre
     {
         public string? libelle { get; set; }
