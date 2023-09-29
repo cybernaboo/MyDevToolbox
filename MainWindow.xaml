@@ -115,21 +115,28 @@
                             <!-- Vos styles ici -->
                         </StackPanel.Resources>
                         <TextBlock Text="Liste des fichiers :" Foreground="White"/>
-                        <StackPanel x:Name="fileListStackPanel" Background="Black">
+                        <StackPanel x:Name="fileListStackPanel" Background="Black" HorizontalAlignment="Center">
                             <ListView x:Name="listViewFiles">
                                 <ListView.View>
-                                    <GridView>
+                                    <GridView >
                                         <GridViewColumn Header="Nom de fichier" Width="250">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding FilePath}" />
+                                                    <TextBlock Text="{Binding FileName}" />
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
-                                        <GridViewColumn Header="Actions" Width="100">
+                                        <GridViewColumn Header="Action" Width="100">
+                                            <GridViewColumn.CellTemplate >
+                                                <DataTemplate >
+                                                    <Button Content="Open" Click="OuvrirFichier_Click" />
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="Action" Width="100">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Button Content="Ouvrir" Click="OuvrirFichier_Click" />
+                                                    <Button Content="Remove link" Click="RemoveFileLink_Click" />
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
@@ -137,6 +144,11 @@
                                 </ListView.View>
                             </ListView>
                         </StackPanel>
+                        <TextBlock Text="File Description :" Width="300" Height="25" Margin="5"/>
+                        <TextBox x:Name="txtNewFileDescription" Width="300" Height="25" Margin="5"/>
+                        <TextBlock Text="FilePath and filename :" Width="300" Height="25" Margin="5"/>
+                        <TextBox x:Name="txtNewFileName" Width="300" Height="25" Margin="5"/>
+                        <Button Content="Add file" Click="AddFile_Click" Width="200" Margin="5"/>
                     </StackPanel>
                 </Grid>
             </TabItem>

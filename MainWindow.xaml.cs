@@ -148,7 +148,7 @@ namespace mdt
                     string? fileName = fileNode.SelectSingleNode("FileName")?.InnerText;
                     if (!string.IsNullOrEmpty(fileName))
                     {
-                        files.Add(new FileItem { FilePath = fileName });
+                        files.Add(new FileItem { FileName = fileName });
                     }
                 }
 
@@ -181,13 +181,13 @@ namespace mdt
             FileItem fileItem = (FileItem)button.DataContext;
 
             // Vérifier si le fichier existe avant de l'ouvrir
-            if (File.Exists(fileItem.FilePath))
+            if (File.Exists(fileItem.FileName))
             {
-                string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileItem.FilePath);
+                string fileName = Path.Combine(Directory.GetCurrentDirectory(), fileItem.FileName);
 
                 // Ici, vous pouvez utiliser Process.Start pour ouvrir le fichier avec l'éditeur de votre choix
                 // par exemple, pour ouvrir avec Notepad++ :
-                Process.Start("notepad++.exe", filePath);
+                Process.Start("notepad++.exe", fileName);
             }
             else
             {
@@ -292,6 +292,88 @@ namespace mdt
             }
         }
 
+        void RemoveFileLink_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            FileItem fileItem = (FileItem)button.DataContext;
+
+            try
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(cheminFichierConfig);
+
+                // Trouvez le nœud de bookmark correspondant dans le XML
+                XmlNode? filesNode = xmlDoc.SelectSingleNode("//Files");
+                XmlNodeList? filesNodes = filesNode?.SelectNodes("File");
+
+                if (filesNodes != null)
+                {
+                    foreach (XmlNode node in filesNodes)
+                    {
+                        XmlNode? fileNameNode = node.SelectSingleNode("FileName");
+                        if (fileNameNode != null && fileNameNode.InnerText == fileItem.FileName)
+                        {
+                            // Supprimez le nœud du bookmark trouvé
+                            filesNode?.RemoveChild(node);
+                            break;
+                        }
+                    }
+
+                    // Enregistrez les modifications dans le fichier XML
+                    xmlDoc.Save(cheminFichierConfig);
+
+                    // Rechargez la liste des bookmarks
+                    ChargerFichiersDepuisXML(xmlDoc);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de la suppression du bookmark : {ex.Message}");
+            }
+        }
+
+        void AddFile_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                String? fileName = txtNewFileName.Text;
+                String? fileDescription = txtNewFileDescription.Text;
+                if (fileName != null && fileDescription != null)
+                {
+                    // Créez un nouvel élément XML pour le fichier avec le nom et la description
+                    XmlDocument xmlDocFiles = new XmlDocument();
+                    xmlDocFiles.Load(cheminFichierConfig);
+
+                    XmlElement? files = xmlDocFiles.SelectSingleNode("//Files") as XmlElement;
+
+                    XmlElement file = xmlDocFiles.CreateElement("File");
+                    files?.AppendChild(file);
+
+                    XmlElement fileNameElement = xmlDocFiles.CreateElement("FileName");
+                    fileNameElement.InnerText = fileName;
+                    file.AppendChild(fileNameElement);
+
+                    XmlElement fileDescriptionElement = xmlDocFiles.CreateElement("FileDescription");
+                    fileDescriptionElement.InnerText = fileDescription;
+                    file.AppendChild(fileDescriptionElement);
+
+                    xmlDocFiles.SelectSingleNode("//Files")?.AppendChild(file);
+
+                    // Sauvegardez le fichier XML mis à jour
+                    xmlDocFiles.Save(cheminFichierConfig);
+                    ChargerFichiersDepuisXML(xmlDocFiles);
+                    // Réinitialiser les champs de saisie wpf
+                    txtNewFileName.Text = "";
+                    txtNewFileDescription.Text = "";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error during file link registering : {ex.Message}");
+            }
+        }
+
         void EnregistrerDansBookmarks_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -365,7 +447,8 @@ namespace mdt
     }
     public class FileItem
     {
-        public string? FilePath { get; set; }
+        public string? FileName { get; set; }
+        public string? FileDescription { get; set; }
     }
     public class Parametre
     {
