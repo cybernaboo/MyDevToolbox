@@ -1,2 +1,2 @@
 Liste des fonctionnalités que je veux ajouter à mon projet C# WPF :
-- Je veux que dans l'onglet Files affiche une liste de tous les fichiers avec sur la même ligne le nom du fichier et un bouton pour ExecuterCommande_Click
+- Anomalie : mes combos sont vides sur le premier onglet

@@ -3,45 +3,45 @@
   <Command>Dir</Command>
   <Parameter1>
     <Item>
-      <Libelle>Option 11</Libelle>
-      <Valeur>Valeur1</Valeur>
+      <Description>Option 11</Description>
+      <Value>Value1</Value>
     </Item>
     <Item>
-      <Libelle>Option 2</Libelle>
-      <Valeur>Valeur2</Valeur>
+      <Description>Option 2</Description>
+      <Value>Value2</Value>
     </Item>
     <!-- Ajoutez d'autres Parameter ici -->
   </Parameter1>
   <Parameter2>
     <Item>
-      <Libelle>OptionA</Libelle>
-      <Valeur>ValeurA</Valeur>
+      <Description>OptionA</Description>
+      <Value>ValueA</Value>
     </Item>
     <Item>
-      <Libelle>OptionB</Libelle>
-      <Valeur>ValeurB</Valeur>
+      <Description>OptionB</Description>
+      <Value>ValueB</Value>
     </Item>
     <!-- Ajoutez d'autres Parameter ici -->
   </Parameter2>
   <Parameter3>
     <Item>
-      <Libelle>ItemX</Libelle>
-      <Valeur>ValueX</Valeur>
+      <Description>ItemX</Description>
+      <Value>ValueX</Value>
     </Item>
     <Item>
-      <Libelle>ItemY</Libelle>
-      <Valeur>ValueY</Valeur>
+      <Description>ItemY</Description>
+      <Value>ValueY</Value>
     </Item>
     <!-- Ajoutez d'autres Parameter ici -->
   </Parameter3>
   <Parameter4>
     <Item>
-      <Libelle>ItemX</Libelle>
-      <Valeur>ValueX</Valeur>
+      <Description>ItemX</Description>
+      <Value>ValueX</Value>
     </Item>
     <Item>
-      <Libelle>ItemY</Libelle>
-      <Valeur>ValueY</Valeur>
+      <Description>ItemY</Description>
+      <Value>ValueY</Value>
     </Item>
     <!-- Ajoutez d'autres Parameter ici -->
   </Parameter4>
@@ -56,8 +56,8 @@
   <Bookmarks>
     <Bookmark>
       <Description>yyy</Description>
-      <Parameter1>Valeur1</Parameter1>
-      <Parameter2>ValeurA</Parameter2>
+      <Parameter1>Value1</Parameter1>
+      <Parameter2>ValueA</Parameter2>
       <Parameter3>ValueX</Parameter3>
       <Parameter4>ValueY</Parameter4>
     </Bookmark>

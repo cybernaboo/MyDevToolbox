@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection.Metadata;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Xml;
 
 namespace mdt
@@ -15,42 +12,42 @@ namespace mdt
     {
         static public string? fileEditor;
         static public string? commandName;
-        static string cheminFichierConfig = "config.xml";
+        static string setupFile = "config.xml";
 
         public MainWindow()
         {
             InitializeComponent();
-            ChargerDonneesDepuisXML();
-            ChargerBookmarksDepuisXML();
+            LoadSetupFromSetupFile();
         }
 
-        void ChargerDonneesDepuisXML()
+        void LoadSetupFromSetupFile()
         {
             try
             {
                 XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(cheminFichierConfig);
+                xmlDoc.Load(setupFile);
 
-                RemplirListeDepuisXML(xmlDoc, "Parameter1", cmbParametre1);
-                RemplirListeDepuisXML(xmlDoc, "Parameter2", cmbParametre2);
-                RemplirListeDepuisXML(xmlDoc, "Parameter3", cmbParametre3);
-                RemplirListeDepuisXML(xmlDoc, "Parameter4", cmbParametre4);
+                LoadParameterListFromSetupFile(xmlDoc, "Parameter1", cmbParameter1);
+                LoadParameterListFromSetupFile(xmlDoc, "Parameter2", cmbParameter2);
+                LoadParameterListFromSetupFile(xmlDoc, "Parameter3", cmbParameter3);
+                LoadParameterListFromSetupFile(xmlDoc, "Parameter4", cmbParameter4);
 
-                ChargerFichiersDepuisXML(xmlDoc);
-                ChargerParametresDepuisXML(xmlDoc);
+                LoadFileLinksFromSetupFile(xmlDoc);
+                LoadParametersFromSetupFile(xmlDoc);
+                LoadBookmarksFromSetupFile();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors du chargement des données depuis le fichier XML : {ex.Message}");
+                MessageBox.Show($"Error during setp loading from setup file : {ex.Message}");
             }
         }
 
-        private void ChargerBookmarksDepuisXML()
+        private void LoadBookmarksFromSetupFile()
         {
             try
             {
                 XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(cheminFichierConfig);
+                xmlDoc.Load(setupFile);
 
                 XmlNodeList? bookmarkNodes = xmlDoc.SelectNodes("//Bookmarks/Bookmark");
                 if (bookmarkNodes == null)
@@ -79,24 +76,24 @@ namespace mdt
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors du chargement des bookmarks depuis le fichier XML : {ex.Message}");
+                MessageBox.Show($"Error during bookmarks loading from setup file : {ex.Message}");
             }
         }
 
-        void ChargerParametresDepuisXML(XmlDocument xmlDoc)
+        void LoadParametersFromSetupFile(XmlDocument xmlDoc)
         {
             try
             {
                 fileEditor = xmlDoc.SelectSingleNode("//FileEditor")?.InnerText;
                 if (fileEditor == null)
                 {
-                    MessageBox.Show($"Pas de paramètre Editeur de fichier défini dans le fichier de paramétrage");
+                    MessageBox.Show($"No file editor parameter defined in setup file");
                     return;
                 }
                 commandName = xmlDoc.SelectSingleNode("//Command")?.InnerText;
                 if (commandName == null)
                 {
-                    MessageBox.Show($"Pas de Commande système défini dans le fichier de paramétrage");
+                    MessageBox.Show($"No system command defined in setup file");
                     return;
                 }
             }
@@ -106,32 +103,32 @@ namespace mdt
             }
         }
 
-        void RemplirListeDepuisXML(XmlDocument xmlDoc, string nodeName, System.Windows.Controls.ComboBox comboBox)
+        void LoadParameterListFromSetupFile(XmlDocument xmlDoc, string nodeName, System.Windows.Controls.ComboBox comboBox)
         {
             XmlNodeList? nodes = xmlDoc.SelectNodes($"//{nodeName}/Item");
-            var parametres = new List<Parametre>();
+            var parameters = new List<Parameter>();
             if (nodes == null)
             {
                 return;
             }
             foreach (XmlNode node in nodes)
             {
-                string? libelle = node.SelectSingleNode("Libelle")?.InnerText;
-                string? valeur = node.SelectSingleNode("Valeur")?.InnerText;
+                string? description = node.SelectSingleNode("Description")?.InnerText;
+                string? value = node.SelectSingleNode("Value")?.InnerText;
 
-                if (libelle != null && valeur != null)
+                if (description != null && value != null)
                 {
-                    parametres.Add(new Parametre(libelle, valeur));
+                    parameters.Add(new Parameter(description, value));
                 }
             }
 
-            comboBox.ItemsSource = parametres;
-            comboBox.DisplayMemberPath = "libelle";
+            comboBox.ItemsSource = parameters;
+            comboBox.DisplayMemberPath = "description";
             comboBox.SelectedIndex = 0;
         }
 
 
-        private void ChargerFichiersDepuisXML(XmlDocument xmlDoc)
+        private void LoadFileLinksFromSetupFile(XmlDocument xmlDoc)
         {
             try
             {
@@ -156,11 +153,11 @@ namespace mdt
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors du chargement des fichiers depuis le fichier XML : {ex.Message}");
+                MessageBox.Show($"Error during file links loading from setup file : {ex.Message}");
             }
         }
 
-        private void ExecuterCommandeBookmark_Click(object sender, RoutedEventArgs e)
+        private void RunBookmarkCommand_Click(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
             BookmarkItem bookmarkItem = (BookmarkItem)button.DataContext;
@@ -168,13 +165,13 @@ namespace mdt
             // Construisez la commande à partir des paramètres du bookmark
             string commande = $"{commandName} {bookmarkItem.Parameter1} {bookmarkItem.Parameter2} {bookmarkItem.Parameter3} {bookmarkItem.Parameter4}";
 
-            txtCommandeBookmark.Text = commande;
+            txtBookmarkCommand.Text = commande;
 
-            string sortie = ExecuterCommandeShell(commande);
-            txtSortieCmdBookmark.Text = sortie;
+            string output = RunShellCommand(commande);
+            txtBookmarkCommandOutput.Text = output;
         }
 
-        private void OuvrirFichier_Click(object sender, RoutedEventArgs e)
+        private void FileOpen_Click(object sender, RoutedEventArgs e)
         {
             // Obtenir l'élément de la liste associé au bouton cliqué
             Button button = (Button)sender;
@@ -191,29 +188,29 @@ namespace mdt
             }
             else
             {
-                MessageBox.Show("Le fichier n'existe pas.");
+                MessageBox.Show("File doesn't exist.");
             }
         }
 
-        void ExecuterCommande_Click(object sender, RoutedEventArgs e)
+        void RunCommand_Click(object sender, RoutedEventArgs e)
         {
-            Parametre? parametre1 = cmbParametre1.SelectedValue as Parametre;
-            Parametre? parametre2 = cmbParametre2.SelectedValue as Parametre;
-            Parametre? parametre3 = cmbParametre3.SelectedValue as Parametre;
-            Parametre? parametre4 = cmbParametre4.SelectedValue as Parametre;
+            Parameter? parameter1 = cmbParameter1.SelectedValue as Parameter;
+            Parameter? parameter2 = cmbParameter2.SelectedValue as Parameter;
+            Parameter? parameter3 = cmbParameter3.SelectedValue as Parameter;
+            Parameter? parameter4 = cmbParameter4.SelectedValue as Parameter;
 
-            if (parametre1 != null && parametre2 != null && parametre3 != null && parametre4 != null)
+            if (parameter1 != null && parameter2 != null && parameter3 != null && parameter4 != null)
             {
-                string commande = $"{commandName} {parametre1.valeur} {parametre2.valeur} {parametre3.valeur} {parametre4.valeur}";
+                string commande = $"{commandName} {parameter1.value} {parameter2.value} {parameter3.value} {parameter4.value}";
 
                 txtCommande.Text = commande;
 
-                string sortie = ExecuterCommandeShell(commande);
-                txtSortieCmd.Text = sortie;
+                string output = RunShellCommand(commande);
+                txtCommandOutput.Text = output;
             }
         }
 
-        static string ExecuterCommandeShell(string commande)
+        static string RunShellCommand(string commande)
         {
             try
             {
@@ -239,20 +236,20 @@ namespace mdt
                 sw.WriteLine(commande);
                 sw.Close();
 
-                string sortie = sr.ReadToEnd();
+                string output = sr.ReadToEnd();
                 sr.Close();
 
                 //await Task.Run(() => process.WaitForExit());
 
-                return sortie;
+                return output;
             }
             catch (Exception ex)
             {
-                return $"Erreur lors de l'exécution de la commande : {ex.Message}";
+                return $"Error during command execution : {ex.Message}";
             }
         }
 
-        void SupprimerBookmark_Click(object sender, RoutedEventArgs e)
+        void RemoveBookmark_Click(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
             BookmarkItem bookmarkItem = (BookmarkItem)button.DataContext;
@@ -260,7 +257,7 @@ namespace mdt
             try
             {
                 XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(cheminFichierConfig);
+                xmlDoc.Load(setupFile);
 
                 // Trouvez le nœud de bookmark correspondant dans le XML
                 XmlNode? bookmarksNode = xmlDoc.SelectSingleNode("//Bookmarks");
@@ -280,15 +277,15 @@ namespace mdt
                     }
 
                     // Enregistrez les modifications dans le fichier XML
-                    xmlDoc.Save(cheminFichierConfig);
+                    xmlDoc.Save(setupFile);
 
                     // Rechargez la liste des bookmarks
-                    ChargerBookmarksDepuisXML();
+                    LoadBookmarksFromSetupFile();
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors de la suppression du bookmark : {ex.Message}");
+                MessageBox.Show($"Error during bookmark removing : {ex.Message}");
             }
         }
 
@@ -300,7 +297,7 @@ namespace mdt
             try
             {
                 XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(cheminFichierConfig);
+                xmlDoc.Load(setupFile);
 
                 // Trouvez le nœud de bookmark correspondant dans le XML
                 XmlNode? filesNode = xmlDoc.SelectSingleNode("//Files");
@@ -320,16 +317,16 @@ namespace mdt
                     }
 
                     // Enregistrez les modifications dans le fichier XML
-                    xmlDoc.Save(cheminFichierConfig);
+                    xmlDoc.Save(setupFile);
 
                     // Rechargez la liste des bookmarks
-                    ChargerFichiersDepuisXML(xmlDoc);
+                    LoadFileLinksFromSetupFile(xmlDoc);
                 }
 
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors de la suppression du bookmark : {ex.Message}");
+                MessageBox.Show($"Error during bookmark removing : {ex.Message}");
             }
         }
 
@@ -343,7 +340,7 @@ namespace mdt
                 {
                     // Créez un nouvel élément XML pour le fichier avec le nom et la description
                     XmlDocument xmlDocFiles = new XmlDocument();
-                    xmlDocFiles.Load(cheminFichierConfig);
+                    xmlDocFiles.Load(setupFile);
 
                     XmlElement? files = xmlDocFiles.SelectSingleNode("//Files") as XmlElement;
 
@@ -361,8 +358,8 @@ namespace mdt
                     xmlDocFiles.SelectSingleNode("//Files")?.AppendChild(file);
 
                     // Sauvegardez le fichier XML mis à jour
-                    xmlDocFiles.Save(cheminFichierConfig);
-                    ChargerFichiersDepuisXML(xmlDocFiles);
+                    xmlDocFiles.Save(setupFile);
+                    LoadFileLinksFromSetupFile(xmlDocFiles);
                     // Réinitialiser les champs de saisie wpf
                     txtNewFileName.Text = "";
                     txtNewFileDescription.Text = "";
@@ -374,21 +371,21 @@ namespace mdt
             }
         }
 
-        void EnregistrerDansBookmarks_Click(object sender, RoutedEventArgs e)
+        void RegistrerBookmark_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                Parametre? parametre1 = cmbParametre1.SelectedValue as Parametre;
-                Parametre? parametre2 = cmbParametre2.SelectedValue as Parametre;
-                Parametre? parametre3 = cmbParametre3.SelectedValue as Parametre;
-                Parametre? parametre4 = cmbParametre4.SelectedValue as Parametre;
+                Parameter? selectedParameter1 = cmbParameter1.SelectedValue as Parameter;
+                Parameter? selectedParameter2 = cmbParameter2.SelectedValue as Parameter;
+                Parameter? selectedParameter3 = cmbParameter3.SelectedValue as Parameter;
+                Parameter? selectedParameter4 = cmbParameter4.SelectedValue as Parameter;
                 string description = txtDescription.Text; // Obtenir la description depuis le champ de saisie
 
-                if (parametre1 != null && parametre2 != null && parametre3 != null && parametre4 != null)
+                if (selectedParameter1 != null && selectedParameter2 != null && selectedParameter3 != null && selectedParameter4 != null)
                 {
                     // Créez un nouvel élément XML pour le bookmark avec les paramètres et la description
                     XmlDocument xmlDocBookmarks = new XmlDocument();
-                    xmlDocBookmarks.Load(cheminFichierConfig);
+                    xmlDocBookmarks.Load(setupFile);
 
                     XmlElement? bookmarks = xmlDocBookmarks.SelectSingleNode("//Bookmarks") as XmlElement;
 
@@ -400,48 +397,44 @@ namespace mdt
                     bookmark.AppendChild(bookmarkDescription);
 
                     XmlElement parameter1 = xmlDocBookmarks.CreateElement("Parameter1");
-                    if (parametre1.valeur != null)
+                    if (selectedParameter1.value != null)
                     {
-                        parameter1.InnerText = parametre1.valeur;
+                        parameter1.InnerText = selectedParameter1.value;
                         bookmark.AppendChild(parameter1);
                     }
 
-                    if (parametre2.valeur != null)
+                    if (selectedParameter2.value != null)
                     {
                         XmlElement parameter2 = xmlDocBookmarks.CreateElement("Parameter2");
-                        parameter2.InnerText = parametre2.valeur;
+                        parameter2.InnerText = selectedParameter2.value;
                         bookmark.AppendChild(parameter2);
                     }
 
-                    if (parametre3.valeur != null)
+                    if (selectedParameter3.value != null)
                     {
                         XmlElement parameter3 = xmlDocBookmarks.CreateElement("Parameter3");
-                        parameter3.InnerText = parametre3.valeur;
+                        parameter3.InnerText = selectedParameter3.value;
                         bookmark.AppendChild(parameter3);
                     }
 
-                    if (parametre4.valeur != null)
+                    if (selectedParameter4.value != null)
                     {
                         XmlElement parameter4 = xmlDocBookmarks.CreateElement("Parameter4");
-                        parameter4.InnerText = parametre4.valeur;
+                        parameter4.InnerText = selectedParameter4.value;
                         bookmark.AppendChild(parameter4);
                     }
 
                     xmlDocBookmarks.SelectSingleNode("//Bookmarks")?.AppendChild(bookmark);
 
-                    // Sauvegardez le fichier XML mis à jour
-                    xmlDocBookmarks.Save(cheminFichierConfig);
-                    ChargerBookmarksDepuisXML();
-                    // Réinitialiser les champs de saisie wpf bookmarkDescription
+                    xmlDocBookmarks.Save(setupFile);
+                    LoadBookmarksFromSetupFile();
                     txtDescription.Text = "";
-
-
 
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors de l'enregistrement du bookmark : {ex.Message}");
+                MessageBox.Show($"Error during bookmark registering : {ex.Message}");
             }
         }
     }
@@ -450,14 +443,14 @@ namespace mdt
         public string? FileName { get; set; }
         public string? FileDescription { get; set; }
     }
-    public class Parametre
+    public class Parameter
     {
-        public string? libelle { get; set; }
-        public string? valeur { get; set; }
-        public Parametre(string parmLibelle, string parmValeur)
+        public string? description { get; set; }
+        public string? value { get; set; }
+        public Parameter(string paramDescription, string paramValue)
         {
-            libelle = parmLibelle;
-            valeur = parmValeur;
+            description = paramDescription;
+            value = paramValue;
         }
     }
     public class BookmarkItem
