@@ -42,6 +42,29 @@ namespace mdt
             }
         }
 
+        void LoadParametersFromSetupFile(XmlDocument xmlDoc)
+        {
+            try
+            {
+                fileEditor = xmlDoc.SelectSingleNode("//FileEditor")?.InnerText;
+                if (fileEditor == null)
+                {
+                    MessageBox.Show($"No file editor parameter defined in setup file");
+                    return;
+                }
+                commandName = xmlDoc.SelectSingleNode("//Command")?.InnerText;
+                if (commandName == null)
+                {
+                    MessageBox.Show($"No system command defined in setup file");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error during global parameters loading from setup file : {ex.Message}");
+            }
+        }
+
         private void LoadBookmarksFromSetupFile()
         {
             try
@@ -80,28 +103,6 @@ namespace mdt
             }
         }
 
-        void LoadParametersFromSetupFile(XmlDocument xmlDoc)
-        {
-            try
-            {
-                fileEditor = xmlDoc.SelectSingleNode("//FileEditor")?.InnerText;
-                if (fileEditor == null)
-                {
-                    MessageBox.Show($"No file editor parameter defined in setup file");
-                    return;
-                }
-                commandName = xmlDoc.SelectSingleNode("//Command")?.InnerText;
-                if (commandName == null)
-                {
-                    MessageBox.Show($"No system command defined in setup file");
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur lors du chargement des paramètres depuis le fichier XML : {ex.Message}");
-            }
-        }
 
         void LoadParameterListFromSetupFile(XmlDocument xmlDoc, string nodeName, System.Windows.Controls.ComboBox comboBox)
         {
