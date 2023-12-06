@@ -4,7 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Title="Far Developer Toolbox" Height="700" Width="1000">
-    <Grid>
+            <Border BorderBrush="DarkGreen" BorderThickness="3"> <!-- Ajoutez ces lignes pour la bordure -->
+     <Grid>
         <!--<Image Source="medias/mdt.png" Width="500" Height="300" />-->
         <TabControl>
             <TabItem Header="FCD" Background="White">
@@ -170,4 +171,5 @@
             </TabItem>
         </TabControl>
     </Grid>
+        </Border>
 </Window>
