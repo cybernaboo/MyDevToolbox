@@ -24,27 +24,23 @@
     <!-- Ajoutez d'autres Parameter ici -->
   </Parameter2>
   <Parameter3>
-    <Item>
-      <Description>ItemX</Description>
-      <Value>ValueX</Value>
-    </Item>
-    <Item>
-      <Description>ItemY</Description>
-      <Value>ValueY</Value>
-    </Item>
     <!-- Ajoutez d'autres Parameter ici -->
   </Parameter3>
-  <Parameter4>
-    <Item>
-      <Description>ItemX</Description>
-      <Value>ValueX</Value>
-    </Item>
-    <Item>
-      <Description>ItemY</Description>
-      <Value>ValueY</Value>
+  <FcdVerbose>
+	  <Item>
+		  <Description>Normal</Description>
+		  <Value>Normal</Value>
+	  </Item>
+	  <Item>
+		  <Description>Quiet</Description>
+		  <Value>Quiet</Value>
+	  </Item>
+	  <Item>
+      <Description>Detailed</Description>
+      <Value>Detailed</Value>
     </Item>
     <!-- Ajoutez d'autres Parameter ici -->
-  </Parameter4>
+  </FcdVerbose>
   <Files>
     <File>
       <FileName>C:\Users\cybernaboo\Desktop\a.txt</FileName>
@@ -59,7 +55,7 @@
       <Parameter1>Value1</Parameter1>
       <Parameter2>ValueA</Parameter2>
       <Parameter3>ValueX</Parameter3>
-      <Parameter4>ValueY</Parameter4>
+      <FcdVerbose>ValueY</FcdVerbose>
     </Bookmark>
   </Bookmarks>
 </Config>

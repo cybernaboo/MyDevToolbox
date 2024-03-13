@@ -30,7 +30,7 @@ namespace mdt
                 LoadParameterListFromSetupFile(xmlDoc, "Parameter1", cmbParameter1);
                 LoadParameterListFromSetupFile(xmlDoc, "Parameter2", cmbParameter2);
                 LoadParameterListFromSetupFile(xmlDoc, "Parameter3", cmbParameter3);
-                LoadParameterListFromSetupFile(xmlDoc, "Parameter4", cmbParameter4);
+                LoadParameterListFromSetupFile(xmlDoc, "FcdVerbose", cmbFcdVerbose);
 
                 LoadFileLinksFromSetupFile(xmlDoc);
                 LoadParametersFromSetupFile(xmlDoc);
@@ -87,8 +87,8 @@ namespace mdt
                         string? parameter1 = bookmarkNode.SelectSingleNode("Parameter1")?.InnerText;
                         string? parameter2 = bookmarkNode.SelectSingleNode("Parameter2")?.InnerText;
                         string? parameter3 = bookmarkNode.SelectSingleNode("Parameter3")?.InnerText;
-                        string? parameter4 = bookmarkNode.SelectSingleNode("Parameter4")?.InnerText;
-                        BookmarkItem? newBookmark = new BookmarkItem { Description = description, Parameter1 = parameter1, Parameter2 = parameter2, Parameter3 = parameter3, Parameter4 = parameter4 };
+                        string? fcdVerbose = bookmarkNode.SelectSingleNode("FcdVerbose")?.InnerText;
+                        BookmarkItem? newBookmark = new BookmarkItem { Description = description, Parameter1 = parameter1, Parameter2 = parameter2, Parameter3 = parameter3, FcdVerbose = fcdVerbose };
                         bookmarks.Add(newBookmark);
                     }
                 }
@@ -164,7 +164,7 @@ namespace mdt
             BookmarkItem bookmarkItem = (BookmarkItem)button.DataContext;
 
             // Construisez la commande à partir des paramètres du bookmark
-            string commande = $"{commandName} {bookmarkItem.Parameter1} {bookmarkItem.Parameter2} {bookmarkItem.Parameter3} {bookmarkItem.Parameter4}";
+            string commande = $"{commandName} {bookmarkItem.Parameter1} {bookmarkItem.Parameter2} {bookmarkItem.Parameter3} {bookmarkItem.FcdVerbose}";
 
             txtBookmarkCommand.Text = commande;
 
@@ -198,11 +198,11 @@ namespace mdt
             Parameter? parameter1 = cmbParameter1.SelectedValue as Parameter;
             Parameter? parameter2 = cmbParameter2.SelectedValue as Parameter;
             Parameter? parameter3 = cmbParameter3.SelectedValue as Parameter;
-            Parameter? parameter4 = cmbParameter4.SelectedValue as Parameter;
+            Parameter? fcdVerbose = cmbFcdVerbose.SelectedValue as Parameter;
 
-            if (parameter1 != null && parameter2 != null && parameter3 != null && parameter4 != null)
+            if (parameter1 != null && parameter2 != null && parameter3 != null && fcdVerbose != null)
             {
-                string commande = $"{commandName} {parameter1.value} {parameter2.value} {parameter3.value} {parameter4.value}";
+                string commande = $"{commandName} {parameter1.value} {parameter2.value} {parameter3.value} {fcdVerbose.value}";
 
                 txtCommande.Text = commande;
 
@@ -379,10 +379,10 @@ namespace mdt
                 Parameter? selectedParameter1 = cmbParameter1.SelectedValue as Parameter;
                 Parameter? selectedParameter2 = cmbParameter2.SelectedValue as Parameter;
                 Parameter? selectedParameter3 = cmbParameter3.SelectedValue as Parameter;
-                Parameter? selectedParameter4 = cmbParameter4.SelectedValue as Parameter;
+                Parameter? selectedFcdVerbose = cmbFcdVerbose.SelectedValue as Parameter;
                 string description = txtDescription.Text; // Obtenir la description depuis le champ de saisie
 
-                if (selectedParameter1 != null && selectedParameter2 != null && selectedParameter3 != null && selectedParameter4 != null)
+                if (selectedParameter1 != null && selectedParameter2 != null && selectedParameter3 != null && selectedFcdVerbose != null)
                 {
                     // Créez un nouvel élément XML pour le bookmark avec les paramètres et la description
                     XmlDocument xmlDocBookmarks = new XmlDocument();
@@ -418,11 +418,11 @@ namespace mdt
                         bookmark.AppendChild(parameter3);
                     }
 
-                    if (selectedParameter4.value != null)
+                    if (selectedFcdVerbose.value != null)
                     {
-                        XmlElement parameter4 = xmlDocBookmarks.CreateElement("Parameter4");
-                        parameter4.InnerText = selectedParameter4.value;
-                        bookmark.AppendChild(parameter4);
+                        XmlElement fcdVerbose = xmlDocBookmarks.CreateElement("FcdVerbose");
+                        fcdVerbose.InnerText = selectedFcdVerbose.value;
+                        bookmark.AppendChild(fcdVerbose);
                     }
 
                     xmlDocBookmarks.SelectSingleNode("//Bookmarks")?.AppendChild(bookmark);
@@ -460,7 +460,7 @@ namespace mdt
         public string? Parameter1 { get; set; }
         public string? Parameter2 { get; set; }
         public string? Parameter3 { get; set; }
-        public string? Parameter4 { get; set; }
+        public string? FcdVerbose { get; set; }
     }
 
 }
