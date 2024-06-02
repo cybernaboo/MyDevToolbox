@@ -25,7 +25,7 @@
                     <TextBlock Text="Parameter 3:"/>
                     <ComboBox x:Name="cmbParameter3" ItemsSource="{Binding}" DisplayMemberPath="description"/>
                     <TextBlock Text="Parameter 4:"/>
-                    <ComboBox x:Name="cmbParameter4" ItemsSource="{Binding}" DisplayMemberPath="description"/>
+                        <ComboBox x:Name="cmbFcdVerbose" ItemsSource="{Binding}" DisplayMemberPath="description"/>
                     <Button Content="Run Command" Click="RunCommand_Click" Width="200" Margin="10"/>
                     <Button Content="Register bookmark" Click="RegistrerBookmark_Click" Width="200" Margin="10"/>
                     <TextBox x:Name="txtDescription" Width="300" Height="25" Margin="10"/>
@@ -78,7 +78,7 @@
                                         <GridViewColumn Header="Parameter 4" Width="100">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding Parameter4}" />
+                                                        <TextBlock Text="{Binding FcdVerbose}" />
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
